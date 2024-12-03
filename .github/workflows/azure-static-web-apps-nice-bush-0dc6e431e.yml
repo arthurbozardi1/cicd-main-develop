@@ -27,9 +27,10 @@ jobs:
       # Passo 2: Instalar o Supabase CLI
       - name: Install Supabase CLI
         run: |
-          [ -f supabase ] && rm -f supabase
-          curl -sSL https://github.com/supabase/cli/releases/latest/download/supabase_linux_amd64.tar.gz | tar xz
-          mv supabase /usr/local/bin
+          mkdir -p /tmp/supabase-cli
+          curl -sSL https://github.com/supabase/cli/releases/latest/download/supabase_linux_amd64.tar.gz | tar xz -C /tmp/supabase-cli
+          sudo mv /tmp/supabase-cli/supabase /usr/local/bin
+          rm -rf /tmp/supabase-cli
 
       # Passo 3: Mover migrações do diretório `develop` para o padrão (opcional, se necessário)
       - name: Prepare Migrations
