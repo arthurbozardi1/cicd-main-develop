@@ -59,18 +59,14 @@ jobs:
             exit 1
           fi
 
-          # Listar o conteúdo do tarball para verificar os arquivos
-          echo "Conteúdo do tarball:"
-          tar -tzf supabase-cli.tar.gz
-
           # Cria um diretório temporário para extrair o arquivo
           mkdir -p /tmp/supabase
 
           # Extrai o tarball para o diretório temporário
           tar -xzf supabase-cli.tar.gz -C /tmp/supabase
 
-          # Verifica se o arquivo binário existe no diretório extraído
-          if [ ! -f "/tmp/supabase/supabase-linux-amd64" ]; then
+          # Verifica se o arquivo binário "supabase" existe no diretório extraído
+          if [ ! -f "/tmp/supabase/supabase" ]; then
             echo "Binário do Supabase não encontrado após a extração."
             exit 1
           fi
@@ -79,7 +75,7 @@ jobs:
           sudo rm -f /usr/local/bin/supabase
 
           # Mover o binário extraído para o diretório correto
-          sudo mv /tmp/supabase/supabase-linux-amd64 /usr/local/bin/supabase
+          sudo mv /tmp/supabase/supabase /usr/local/bin/supabase
 
           # Verificar a versão do Supabase CLI
           supabase --version
