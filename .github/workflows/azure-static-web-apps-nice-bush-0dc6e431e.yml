@@ -46,7 +46,11 @@ jobs:
       - name: Install Supabase CLI
         run: |
           echo "Baixando Supabase CLI..."
-          wget -q https://github.com/supabase/cli/releases/download/v1.63.3/supabase-linux-amd64 -O supabase-cli
+          curl -sL https://github.com/supabase/cli/releases/download/v1.63.3/supabase-linux-amd64 -o supabase-cli
+          if [ $? -ne 0 ]; then
+            echo "Erro ao baixar o Supabase CLI."
+            exit 1
+          fi
           chmod +x supabase-cli
           sudo mv supabase-cli /usr/local/bin/supabase
           supabase --version
