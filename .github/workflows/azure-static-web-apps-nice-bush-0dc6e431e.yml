@@ -43,7 +43,7 @@ jobs:
         with:
           fetch-depth: 0
 
-            - name: Install Supabase CLI
+      - name: Install Supabase CLI
         run: |
           echo "Baixando Supabase CLI..."
           curl -sL https://github.com/supabase/cli/releases/download/v1.226.3/supabase_linux_amd64.tar.gz -o supabase-cli.tar.gz
