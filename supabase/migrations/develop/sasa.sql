@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
 );
 CREATE INDEX IF NOT EXISTS idx_usuarios_nome ON usuarios (nome);
 
-CREATE TABLE erwr (
+CREATE TABLE fsadfg  (
   id SERIAL PRIMARY KEY,
   nome TEXT NOT NULL
 );

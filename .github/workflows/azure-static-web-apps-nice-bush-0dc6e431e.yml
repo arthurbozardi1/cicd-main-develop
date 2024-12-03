@@ -45,9 +45,8 @@ jobs:
 
       - name: Install Supabase CLI
         run: |
-          curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
-          sudo apt-get install -y nodejs
-          npm install -g supabase
+          curl -fsSL https://get.supabase.com/install/linux | sh
+          export PATH="$HOME/.supabase/bin:$PATH"
 
       - name: Apply Migrations
         env:
