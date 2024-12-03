@@ -1,16 +1,3 @@
-name: Azure Static Web Apps CI/CD
-
-on:
-  push:
-    branches:
-      - testeDp
-    paths:
-      - "supabase/migrations/develop/*.sql" # Monitora alterações nos arquivos .sql
-  pull_request:
-    types: [opened, synchronize, reopened, closed]
-    branches:
-      - testeDp
-
 jobs:
   build_and_deploy_job:
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
@@ -28,9 +15,8 @@ jobs:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_GENTLE_SEA_0D93CA71E }}
           repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for Github integrations (i.e. PR comments)
           action: "upload"
-          app_location: "./src" # App source code path
-          api_location: "" # Api source code path - optional
-          output_location: "." # Built app content directory - optional
+          app_location: "./src"  # Aponta para o código da aplicação
+          output_location: "."  # Diretório de saída
           skip_app_build: true
 
   update_supabase_job:
