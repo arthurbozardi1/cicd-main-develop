@@ -46,9 +46,9 @@ jobs:
       - name: Install Supabase CLI
         run: |
           echo "Downloading Supabase CLI..."
-          wget -q https://github.com/supabase/cli/releases/latest/download/supabase-linux-amd64 -O supabase
-          chmod +x supabase
-          sudo mv supabase /usr/local/bin/
+          wget -q https://github.com/supabase/cli/releases/latest/download/supabase-linux-amd64 -O supabase-cli
+          chmod +x supabase-cli
+          sudo mv supabase-cli /usr/local/bin/supabase
           supabase --version
 
       - name: Apply Migrations with Supabase CLI
