@@ -1,84 +1,35 @@
-# Documentação da Implementação de CI/CD
+# CI/CD with Supabase Integration
 
-## Visão Geral
+Este repositório utiliza uma pipeline de **CI/CD** para automatizar o processo de deploy do código e a aplicação de migrações de banco de dados no Supabase, usando GitHub Actions. A pipeline foi configurada para as branches `main` e `develop`, com diferentes comportamentos de deploy e migração.
 
-Esta documentação descreve a implementação de um processo de **CI/CD** para gerenciar a publicação de um sistema simples composto por uma página estática (`index.html`) e a atualização de um banco de dados (`Supabase PostgreSQL`). O objetivo é automatizar as atualizações do sistema e do banco de dados, garantindo que as versões mais recentes estejam sempre disponíveis em produção e testes, com controle de migrações de banco de dados.
+## Fluxo de CI/CD
 
-Este processo utiliza as ferramentas **GitHub Actions**, **Azure Static Web Apps** e **Supabase PostgreSQL**. O workflow de CI/CD foi configurado para rodar de maneira automatizada com base em eventos nas branches `main` e `develop`.
+### Branches
 
----
+- **main**: A pipeline é acionada quando há um push ou uma PR aberta/sincronizada/reaberta para a branch `main`. O deploy é realizado automaticamente, e migrações de banco de dados são aplicadas.
+- **develop**: A pipeline é idêntica à da branch `main`, com as mesmas ações de deploy e migração, mas voltada para a branch `develop`. As únicas diferenças são as URLs e o caminho dos arquivos de migração.
 
-## Estrutura do Repositório
+### Ações da Pipeline
 
-O repositório do GitHub é composto por:
+A pipeline possui três principais etapas:
 
-- **Branch `main`**: Contém a versão de produção do sistema, com um fluxo agendado de atualizações diárias do sistema e banco de dados.
-- **Branch `develop`**: Contém a versão em desenvolvimento do sistema, onde qualquer PR resulta em atualizações do sistema e banco de dados.
-- **Arquivos de Migração SQL**: Localizados em `supabase/migrations/`, responsáveis por definir as alterações no banco de dados.
-- **Pipeline de CI/CD**: Configurada para as branches `main` e `develop`, usando **GitHub Actions** para automatizar o build, deploy e migração de banco de dados.
+1. **Checkout do código**: O código é obtido a partir do repositório, incluindo submódulos e desabilitando o LFS (Large File Storage).
+2. **Aplicação das migrações do Supabase**: A conexão com o banco de dados do Supabase é feita usando uma string de conexão armazenada como segredo no GitHub (e diferente para `main` e `develop`). Se houver arquivos de migração disponíveis na pasta `supabase/migrations/main/`, eles serão aplicados ao banco de dados.
+3. **Deploy do aplicativo estático**: O código é implantado em uma Azure Static Web App, utilizando um token de API do Azure e o repositório do GitHub.
 
----
+### Detalhamento da Configuração
 
-## Definição do Workflow de CI/CD
+A seguir estão os detalhes sobre cada job da pipeline:
 
-A pipeline foi projetada para atender aos seguintes requisitos:
+#### Job 1: `build_and_deploy_job`
 
-### 1. **Branch `develop`**
+Este job é responsável por:
 
-Sempre que um Pull Request (PR) for feito para a branch `develop`, o processo de CI/CD deve ser acionado, realizando as seguintes tarefas:
-
-- **Build e Deploy do Sistema**: O código da página `index.html` será enviado para o ambiente de hospedagem (Azure Static Web Apps).
-- **Atualização do Banco de Dados**: O banco de dados do ambiente `develop` será atualizado com base nas migrações contidas no repositório.
-
-### 2. **Branch `main`**
-
-A branch `main` tem uma configuração especial, onde o sistema e o banco de dados serão atualizados de forma agendada todos os dias às 21:00 UTC.
-
-- **Agendamento Diário**: A atualização será feita automaticamente pela GitHub Actions, sem a necessidade de PRs.
-- **Build e Deploy do Sistema**: O código da página `index.html` será publicado.
-- **Atualização do Banco de Dados**: As migrações de banco de dados serão aplicadas automaticamente.
-
-### 3. **Mecanismo de Migração do Banco de Dados**
-
-A migração do banco de dados é crucial, já que as versões do banco podem variar entre os ambientes `develop` e `main`. Cada vez que uma migração for realizada, ela será registrada para garantir que as migrações anteriores não sejam executadas novamente.
-
-A tabela `migrations` foi criada para controlar o status das migrações. Ela inclui:
-
-- `migration_name`: O nome do arquivo SQL da migração.
-- `applied_at`: Data e hora da execução da migração.
-- `status`: Status da migração (exemplo: "pending", "applied").
-- `checksum`: Um hash do conteúdo SQL para verificar a integridade da migração.
-
----
-
-## GitHub Actions: Workflow e Gatilhos
-
-O workflow foi configurado com o arquivo `.github/workflows/ci-cd.yml`. Abaixo está uma explicação detalhada das seções do arquivo.
-
-### Gatilhos
-
-O workflow é acionado por três tipos de eventos:
-
-1. **Push para a Branch `develop`**: Sempre que houver um push ou PR para a branch `develop`, a pipeline de deploy e migração será executada.
-2. **Push para a Branch `main`**: O workflow também pode ser acionado por push, mas a principal atualização ocorrerá de forma agendada.
-3. **Agendamento**: O workflow é executado diariamente às 21:00 UTC para a branch `main`.
+- **Checkout do código**: Faz o checkout do código, incluindo submódulos.
+- **Configuração de variáveis de ambiente**: Define a string de conexão com o banco de dados a partir dos segredos armazenados no GitHub (`SUPABASE_DB_URL_MAIN` para `main` e `SUPABASE_DB_URL_DEVELOP` para `develop`).
+- **Validação da string de conexão**: Garante que a string de conexão do banco de dados foi definida corretamente.
+- **Aplicação de migrações**: Aplica migrações ao banco de dados usando os arquivos SQL localizados em `supabase/migrations/main/` para a branch `main`, e `supabase/migrations/develop/` para a branch `develop`.
+- **Deploy**: Faz o upload do código para uma Azure Static Web App.
 
 ```yaml
-name: Azure Static Web Apps CI/CD
-
-on:
-  pull_request:
-    types: [opened, synchronize, reopened, closed]
-    branches:
-      - develop
-  push:
-    branches:
-      - main
-    paths:
-      - "supabase/migrations/main/*.sql"  # Monitora alterações nos arquivos .sql na branch main
-  schedule:
-    - cron: '0 21 * * *'  # Agendado para rodar todos os dias às 21:00 (UTC)
-
-
-Develop: https://nice-bush-0dc6e431e.4.azurestaticapps.net/
-Main: https://red-wave-06b407d1e.4.azurestaticapps.net/
+name: Build, Deploy, and Update Supabase Database
