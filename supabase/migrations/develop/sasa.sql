@@ -1,7 +1,7 @@
 -- 20241201_create_users_table.sql
 
 -- Criação da tabela 'users'
-CREATE TABLE IF NOT EXISTS dasdas (
+CREATE TABLE IF NOT EXISTS das (
   id BIGSERIAL PRIMARY KEY,
   username VARCHAR(50) UNIQUE NOT NULL,
   email VARCHAR(100) UNIQUE NOT NULL,

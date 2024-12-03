@@ -51,6 +51,12 @@ jobs:
             echo "Erro ao baixar o Supabase CLI."
             exit 1
           fi
+          # Verifica se o arquivo baixado é válido
+          file supabase-cli
+          if [ $? -ne 0 ]; then
+            echo "O arquivo baixado não é um binário válido."
+            exit 1
+          fi
           chmod +x supabase-cli
           sudo mv supabase-cli /usr/local/bin/supabase
           supabase --version
