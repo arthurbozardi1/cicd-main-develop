@@ -61,7 +61,7 @@ jobs:
         if: env.MODIFIED_FILES != ''
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_DEVELOP_URL }}
-          SUPABASE_API_KEY: jzrdicjsimaxfrphoohs
+          SUPABASE_API_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp6cmRpY2pzaW1heGZycGhvb2hzIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczMzE5OTA3OSwiZXhwIjoyMDQ4Nzc1MDc5fQ.Xnoa1FJdgUBIuVi1ugfusn7SlDmKg7uPIyyQBp7ssiw
         run: |
           for file in $MODIFIED_FILES; do
             echo "Uploading $file to Supabase..."
