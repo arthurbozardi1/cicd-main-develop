@@ -2,6 +2,8 @@ name: Azure Static Web Apps CI/CD with Supabase Migrations
 
 on:
   push:
+    paths:
+      - 'supabase/migrations/develop/**/*.sql'
     branches:
       - develop
   pull_request:
@@ -15,7 +17,7 @@ jobs:
     name: Build and Deploy Job
     env:
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_DEVELOP_API_KEY }}
-      SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_DEVELOP_URL }}
+      SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
 
     steps:
       # Passo 1: Checar o repositório
@@ -32,25 +34,12 @@ jobs:
           sudo mv /tmp/supabase-cli/supabase /usr/local/bin
           rm -rf /tmp/supabase-cli
 
-      # Passo 3: Criar arquivo config.toml dinamicamente
-      - name: Configure Supabase Project
-        run: |
-          mkdir -p supabase
-          echo "project_id = '${{ secrets.SUPABASE_PROJECT_ID }}'" > supabase/config.toml
-          echo "api_key = '${{ secrets.SUPABASE_ACCESS_TOKEN }}'" >> supabase/config.toml
-
-      # Passo 4: Mover migrações do diretório `develop` para o padrão (opcional, se necessário)
-      - name: Prepare Migrations
-        run: |
-          mkdir -p supabase/migrations
-          cp -R supabase/migrations/develop/* supabase/migrations/
-
-      # Passo 5: Aplicar migrações diretamente
+      # Passo 3: Aplicar migrações diretamente
       - name: Apply Supabase Migrations
         run: |
           supabase db push
 
-      # Passo 6: Build e deploy do Azure (caso necessário)
+      # Passo 4: Build e deploy do Azure (caso necessário)
       - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
