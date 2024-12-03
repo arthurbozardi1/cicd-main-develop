@@ -1,17 +1,14 @@
--- Migration: Create Users Table
+-- 20241201_create_users_table.sql
+
+-- Criação da tabela 'users'
 CREATE TABLE IF NOT EXISTS users (
   id BIGSERIAL PRIMARY KEY,
-  name VARCHAR(255) NOT NULL,
-  email VARCHAR(255) UNIQUE NOT NULL,
-  created_at TIMESTAMP DEFAULT NOW()
+  username VARCHAR(50) UNIQUE NOT NULL,
+  email VARCHAR(100) UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Criação de um índice para melhorar consultas por e-mail
 CREATE INDEX IF NOT EXISTS idx_users_email ON users (email);
-
--- Migration: Create Users Table
-CREATE TABLE IF NOT EXISTS DASD (
-  id BIGSERIAL PRIMARY KEY,
-  name VARCHAR(255) NOT NULL,
-  email VARCHAR(255) UNIQUE NOT NULL,
-  created_at TIMESTAMP DEFAULT NOW()
-);
