@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - develop
-    paths:
-      - "supabase/migrations/develop/*.sql" # Monitora alterações nos arquivos .sql
   pull_request:
     types: [opened, synchronize, reopened, closed]
     branches:
@@ -35,32 +33,6 @@ jobs:
           output_location: "." # Built app content directory - optional
           skip_app_build: true
           ###### End of Repository/Build Configurations ######
-
-  update_supabase_job:
-    if: github.event_name == 'push'
-    runs-on: ubuntu-latest
-    name: Update Supabase Job
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-      - name: Find Modified SQL Files
-        id: find_files
-        run: |
-          echo "Searching for modified SQL files..."
-          git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep 'supabase/migrations/develop/.*\.sql$' || true
-      - name: Update Supabase
-        if: steps.find_files.outputs.modified_files != ''
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_DEVELOP_URL }}
-          SUPABASE_API_KEY: ${{ secrets.SUPABASE_DEVELOP_API_KEY }}
-        run: |
-          for file in $(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep 'supabase/migrations/develop/.*\.sql$'); do
-            echo "Uploading $file to Supabase..."
-            curl -X POST "${SUPABASE_URL}/rest/v1/migrations" \
-              -H "apikey: ${SUPABASE_API_KEY}" \
-              -H "Content-Type: application/json" \
-              --data-binary @"$file"
-          done
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
