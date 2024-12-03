@@ -5,7 +5,7 @@ on:
     branches:
       - develop
     paths:
-      - "supabase/migrations/develop/*.sql" # Monitora alterações nos arquivos .sql
+      - "supabase/migrations/*.sql" # Monitora alterações nos arquivos .sql
   pull_request:
     types: [opened, synchronize, reopened, closed]
     branches:
@@ -46,9 +46,10 @@ jobs:
       - name: Install Supabase CLI
         run: |
           echo "Downloading Supabase CLI..."
-          wget -q https://github.com/supabase/cli/releases/latest/download/supabase-linux-amd64 -O supabase-cli
-          chmod +x supabase-cli
-          sudo mv supabase-cli /usr/local/bin/supabase
+          wget -q https://github.com/supabase/cli/releases/download/v1.226.3/supabase_1.226.3_linux_arm64.rpm -O supabase.rpm
+          sudo apt-get update -y
+          sudo apt-get install -y alien
+          sudo alien -i supabase.rpm
           supabase --version
 
       - name: Apply Migrations with Supabase CLI
