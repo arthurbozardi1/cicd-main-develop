@@ -36,8 +36,7 @@ jobs:
       - name: Configure Supabase Project
         run: |
           mkdir -p supabase
-          echo "[project]" > supabase/config.toml
-          echo "project_id = '${{ secrets.SUPABASE_PROJECT_ID }}'" >> supabase/config.toml
+          echo "project_id = '${{ secrets.SUPABASE_PROJECT_ID }}'" > supabase/config.toml
           echo "api_key = '${{ secrets.SUPABASE_ACCESS_TOKEN }}'" >> supabase/config.toml
 
       # Passo 4: Mover migrações do diretório `develop` para o padrão (opcional, se necessário)
