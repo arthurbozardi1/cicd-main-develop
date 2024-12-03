@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - testeDp
+    paths:
+      - "supabase/migrations/develop/*.sql" # Monitora alterações nos arquivos .sql
   pull_request:
     types: [opened, synchronize, reopened, closed]
     branches:
@@ -26,12 +28,47 @@ jobs:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_GENTLE_SEA_0D93CA71E }}
           repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for Github integrations (i.e. PR comments)
           action: "upload"
-          ###### Repository/Build Configurations - These values can be configured to match your app requirements. ######
-          # For more information regarding Static Web App workflow configurations, please visit: https://aka.ms/swaworkflowconfig
           app_location: "./src" # App source code path
           api_location: "" # Api source code path - optional
           output_location: "." # Built app content directory - optional
-          ###### End of Repository/Build Configurations ######
+          skip_app_build: true
+
+  update_supabase_job:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    name: Update Supabase Job
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Check if Previous Commit Exists
+        run: |
+          if ! git cat-file -e ${{ github.event.before }}^{commit}; then
+            echo "Previous commit not found. Skipping diff check."
+            exit 0
+          fi
+      - name: Find Modified SQL Files
+        id: find_files
+        run: |
+          echo "Searching for modified SQL files..."
+          MODIFIED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep 'supabase/migrations/develop/.*\.sql$' || true)
+          echo "MODIFIED_FILES=$MODIFIED_FILES" >> $GITHUB_ENV
+      - name: Update Supabase
+        if: env.MODIFIED_FILES != ''
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_DEVELOP_URL }}
+          SUPABASE_API_KEY: ${{ secrets.SUPABASE_DEVELOP_API_KEY }}
+        run: |
+          for file in $MODIFIED_FILES; do
+            echo "Uploading $file to Supabase..."
+            CONTENT=$(cat "$file" | jq -Rs .) # Converte o conteúdo do arquivo em JSON
+            curl -X POST "${SUPABASE_URL}/rest/v1/migrations" \
+              -H "apikey: ${SUPABASE_API_KEY}" \
+              -H "Content-Type: application/json" \
+              -d "{\"file\":\"$file\",\"content\":$CONTENT}"
+          done
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
