@@ -1,0 +1,87 @@
+name: Azure Static Web Apps CI/CD
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+    branches:
+      - main
+  push:
+    branches:
+      - main
+    paths:
+      - "supabase/migrations/main/*.sql"  # Monitora alterações nos arquivos .sql na branch main
+  schedule:
+    - cron: '0 21 * * *'  # Agendado para rodar todos os dias às 21:00 (UTC)
+
+jobs:
+  build_and_deploy_job:
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
+    runs-on: ubuntu-latest
+    name: Build and Deploy Job
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+          lfs: false
+      - name: Build And Deploy
+        id: builddeploy
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_API_TOKEN_MAIN }}  # Usando o token para a branch main
+          repo_token: ${{ secrets.GITHUB_TOKEN }}  # Usado para integrações do GitHub (ex.: comentários em PR)
+          action: "upload"
+          app_location: "/src"  # Caminho do código-fonte do app
+          api_location: ""  # Caminho do código-fonte da API - opcional
+          output_location: "."  # Diretório de conteúdo compilado do app - opcional
+          skip_app_build: true
+
+  update_supabase_job:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    name: Update Supabase Job
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Install Supabase CLI
+        run: |
+          echo "Baixando Supabase CLI..."
+          curl -sL https://github.com/supabase/cli/releases/download/v1.226.3/supabase_linux_amd64.tar.gz -o supabase-cli.tar.gz
+          mkdir -p /tmp/supabase
+          tar -xzf supabase-cli.tar.gz -C /tmp/supabase
+          sudo mv /tmp/supabase/supabase /usr/local/bin/supabase
+          supabase --version
+
+      - name: Initialize Supabase Project
+        run: |
+          echo "Inicializando o projeto Supabase..."
+          supabase init
+        working-directory: ./supabase
+
+      - name: Link Supabase Project
+        run: |
+          echo "Vinculando o projeto Supabase..."
+          supabase link --project-ref ${{ secrets.SUPABASE_MAIN_URL }}
+        working-directory: ./supabase
+
+      - name: Apply Migrations with Supabase CLI
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_MAIN_API_KEY }}
+        run: |
+          echo "Aplicando migrações..."
+          supabase db push
+        working-directory: ./supabase
+
+  close_pull_request_job:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    name: Close Pull Request Job
+    steps:
+      - name: Close Pull Request
+        id: closepullrequest
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_API_TOKEN_MAIN }}
+          action: "close"
