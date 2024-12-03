@@ -78,3 +78,7 @@ on:
       - "supabase/migrations/main/*.sql"  # Monitora alterações nos arquivos .sql na branch main
   schedule:
     - cron: '0 21 * * *'  # Agendado para rodar todos os dias às 21:00 (UTC)
+
+
+Develop: https://nice-bush-0dc6e431e.4.azurestaticapps.net/
+Main: https://red-wave-06b407d1e.4.azurestaticapps.net/
