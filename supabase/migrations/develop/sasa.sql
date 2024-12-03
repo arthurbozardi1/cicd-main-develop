@@ -1,11 +1,7 @@
--- 20241201_create_users_table.sql
+-- Criação da tabela 'log'
 
--- Criação da tabela 'users'
-CREATE TABLE IF NOT EXISTS dasdas (
-  id BIGSERIAL PRIMARY KEY,
-  username VARCHAR(50) UNIQUE NOT NULL,
-  email VARCHAR(100) UNIQUE NOT NULL,
-  password_hash TEXT NOT NULL,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
+CREATE TABLE log (
+    id SERIAL PRIMARY KEY,
+    log VARCHAR(255) NOT NULL,
+    status VARCHAR(20) DEFAULT 'pending',
 );
