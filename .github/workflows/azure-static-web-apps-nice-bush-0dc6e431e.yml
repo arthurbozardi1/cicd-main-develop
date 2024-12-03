@@ -89,12 +89,12 @@ jobs:
       - name: Link Supabase Project
         run: |
           echo "Vinculando o projeto Supabase..."
-          supabase link --project-ref ${{ secrets.SUPABASE_PROJECT_REF }} # Adicionando o link com o ref do projeto
+          supabase link --project-ref jzrdicjsimaxfrphoohs # Substitua pelo ref do seu projeto Supabase
         working-directory: ./supabase  # Alterado para o diretório onde o projeto Supabase está localizado
 
       - name: Apply Migrations with Supabase CLI
         env:
-          SUPABASE_ACCESS_TOKEN: sbp_921404a287b56c83c7fd1994c3f7529c09c634d3
+          SUPABASE_ACCESS_TOKEN: sbp_921404a287b56c83c7fd1994c3f7529c09c634d3 # Insira o token diretamente aqui
         run: |
           echo "Aplicando migrações..."
           supabase db push
