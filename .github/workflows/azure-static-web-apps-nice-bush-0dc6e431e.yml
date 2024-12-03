@@ -32,18 +32,26 @@ jobs:
           sudo mv /tmp/supabase-cli/supabase /usr/local/bin
           rm -rf /tmp/supabase-cli
 
-      # Passo 3: Mover migrações do diretório `develop` para o padrão (opcional, se necessário)
+      # Passo 3: Criar arquivo config.toml dinamicamente
+      - name: Configure Supabase Project
+        run: |
+          mkdir -p supabase
+          echo "[project]" > supabase/config.toml
+          echo "project_id = '${{ secrets.SUPABASE_PROJECT_ID }}'" >> supabase/config.toml
+          echo "api_key = '${{ secrets.SUPABASE_ACCESS_TOKEN }}'" >> supabase/config.toml
+
+      # Passo 4: Mover migrações do diretório `develop` para o padrão (opcional, se necessário)
       - name: Prepare Migrations
         run: |
           mkdir -p supabase/migrations
           cp -R supabase/migrations/develop/* supabase/migrations/
 
-      # Passo 4: Aplicar migrações diretamente
+      # Passo 5: Aplicar migrações diretamente
       - name: Apply Supabase Migrations
         run: |
           supabase db push
 
-      # Passo 5: Build e deploy do Azure (caso necessário)
+      # Passo 6: Build e deploy do Azure (caso necessário)
       - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
