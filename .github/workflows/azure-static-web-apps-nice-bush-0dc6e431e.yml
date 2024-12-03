@@ -43,7 +43,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install Supabase CLI
+            - name: Install Supabase CLI
         run: |
           echo "Baixando Supabase CLI..."
           curl -sL https://github.com/supabase/cli/releases/download/v1.226.3/supabase_linux_amd64.tar.gz -o supabase-cli.tar.gz
@@ -59,11 +59,14 @@ jobs:
             exit 1
           fi
 
-          # Extrai o tarball
-          tar -xzf supabase-cli.tar.gz
+          # Cria um diretório temporário para extrair o arquivo
+          mkdir -p /tmp/supabase
+
+          # Extrai o tarball para o diretório temporário
+          tar -xzf supabase-cli.tar.gz -C /tmp/supabase
 
           # Verifica se o arquivo binário existe no diretório extraído
-          if [ ! -f "supabase-linux-amd64" ]; then
+          if [ ! -f "/tmp/supabase/supabase-linux-amd64" ]; then
             echo "Binário do Supabase não encontrado após a extração."
             exit 1
           fi
@@ -72,8 +75,7 @@ jobs:
           sudo rm -f /usr/local/bin/supabase
 
           # Mover o binário extraído para o diretório correto
-          chmod +x supabase-linux-amd64
-          sudo mv supabase-linux-amd64 /usr/local/bin/supabase
+          sudo mv /tmp/supabase/supabase-linux-amd64 /usr/local/bin/supabase
 
           # Verificar a versão do Supabase CLI
           supabase --version
