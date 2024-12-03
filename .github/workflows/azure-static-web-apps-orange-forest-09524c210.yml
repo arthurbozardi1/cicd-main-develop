@@ -36,12 +36,11 @@ jobs:
       # Run migrations
       - name: Apply Supabase Migrations
         run: |
-          # Extract connection parameters
-          PGPASSWORD=$(echo $GCOCONSTR | awk -F'[:@]' '{print $2}')
-          DB_HOST=$(echo $GCOCONSTR | awk -F'[@/:]' '{print $4}')
-          DB_PORT=$(echo $GCOCONSTR | awk -F'[@/:]' '{print $5}')
-          DB_NAME=$(echo $GCOCONSTR | awk -F'/' '{print $NF}')
-          DB_USER=$(echo $GCOCONSTR | awk -F'[/:@]' '{print $4}')
+          PGPASSWORD=$(echo $GCOCONSTR | sed -E 's|.*://.*:(.*)@.*|\1|')
+          DB_HOST=$(echo $GCOCONSTR | sed -E 's|.*://.*@([^:]*):.*|\1|')
+          DB_PORT=$(echo $GCOCONSTR | sed -E 's|.*://.*:.*@.*:([0-9]*)/.*|\1|')
+          DB_NAME=$(echo $GCOCONSTR | sed -E 's|.*/([^/]*)$|\1|')
+          DB_USER=$(echo $GCOCONSTR | sed -E 's|.*://([^:]*):.*@.*|\1|')
 
           echo "Connecting to $DB_HOST:$DB_PORT/$DB_NAME as $DB_USER"
 
@@ -49,7 +48,7 @@ jobs:
           if [ "$(ls supabase/migrations/develop/*.sql 2>/dev/null)" ]; then
             for file in supabase/migrations/develop/*.sql; do
               echo "Applying migration: $file"
-              psql -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME -f $file || {
+              PGPASSWORD=$PGPASSWORD psql -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME -f $file || {
                 echo "Failed to apply migration: $file"; exit 1;
               }
             done
