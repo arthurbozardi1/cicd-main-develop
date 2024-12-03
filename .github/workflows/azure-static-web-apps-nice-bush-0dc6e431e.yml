@@ -5,7 +5,7 @@ on:
     branches:
       - develop
     paths:
-      - "supabase/migrations/develop/*.sql" # Monitora alterações nos arquivos .sql
+      - "supabase/migrations/develop/*.sql"  # Monitora alterações nos arquivos .sql
   pull_request:
     types: [opened, synchronize, reopened, closed]
     branches:
@@ -26,11 +26,11 @@ jobs:
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_API_TOKEN_DEVELOP }}
-          repo_token: ${{ secrets.GITHUB_TOKEN }} # Usado para integrações do Github (ex.: comentários em PR)
+          repo_token: ${{ secrets.GITHUB_TOKEN }}  # Usado para integrações do GitHub (ex.: comentários em PR)
           action: "upload"
-          app_location: "/src" # Caminho do código-fonte do app
-          api_location: "" # Caminho do código-fonte da API - opcional
-          output_location: "." # Diretório de conteúdo compilado do app - opcional
+          app_location: "/src"  # Caminho do código-fonte do app
+          api_location: ""  # Caminho do código-fonte da API - opcional
+          output_location: "."  # Diretório de conteúdo compilado do app - opcional
           skip_app_build: true
 
   update_supabase_job:
@@ -89,12 +89,12 @@ jobs:
       - name: Link Supabase Project
         run: |
           echo "Vinculando o projeto Supabase..."
-          supabase link --project-ref jzrdicjsimaxfrphoohs # Substitua pelo ref do seu projeto Supabase
+          supabase link --project-ref jzrdicjsimaxfrphoohs  # Substitua pelo ref do seu projeto Supabase
         working-directory: ./supabase  # Alterado para o diretório onde o projeto Supabase está localizado
 
       - name: Apply Migrations with Supabase CLI
         env:
-          SUPABASE_ACCESS_TOKEN: sbp_921404a287b56c83c7fd1994c3f7529c09c634d3 # Insira o token diretamente aqui
+          SUPABASE_ACCESS_TOKEN: sbp_921404a287b56c83c7fd1994c3f7529c09c634d3  # Insira o token diretamente aqui
         run: |
           echo "Aplicando migrações..."
           supabase db push
