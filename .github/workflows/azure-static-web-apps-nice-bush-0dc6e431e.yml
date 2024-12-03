@@ -27,10 +27,12 @@ jobs:
           curl -sSL https://github.com/supabase/cli/releases/latest/download/supabase_linux_amd64.tar.gz | tar xz
           mv supabase /usr/local/bin
 
-      # Passo 3: Vincular projeto (necessário apenas se ainda não estiver vinculado)
+      # Passo 3: Vincular projeto
       - name: Link Supabase Project
         run: |
-          echo "${{ secrets.SUPABASE_ACCESS_TOKEN }}" | supabase link --password
+          supabase link \
+            --password ${{ secrets.SUPABASE_ACCESS_TOKEN }} \
+            --project-ref ${{ secrets.SUPABASE_PROJECT_ID }}
 
       # Passo 4: Aplicar migrações diretamente
       - name: Apply Supabase Migrations
