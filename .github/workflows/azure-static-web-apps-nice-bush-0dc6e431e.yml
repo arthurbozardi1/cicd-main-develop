@@ -30,22 +30,12 @@ jobs:
           curl -sSL https://github.com/supabase/cli/releases/latest/download/supabase_linux_amd64.tar.gz | tar xz
           mv supabase /usr/local/bin
 
-      # Passo 3: Configurar arquivo config.toml temporário
-      - name: Configure Supabase CLI
-        run: |
-          mkdir -p supabase
-          echo "[project]" > supabase/config.toml
-          echo "project_id = '${{ secrets.SUPABASE_PROJECT_ID }}'" >> supabase/config.toml
-          echo "api_key = '${{ secrets.SUPABASE_ACCESS_TOKEN }}'" >> supabase/config.toml
-
-      # Passo 4: Aplicar migrações diretamente
+      # Passo 3: Aplicar migrações diretamente
       - name: Apply Supabase Migrations
         run: |
-          supabase db push \
-            --schema public \
-            --migrations-dir ./migrations/develop
+          supabase db push --migrations-dir ./migrations/develop
 
-      # Passo 5: Build e deploy do Azure (caso necessário)
+      # Passo 4: Build e deploy do Azure (caso necessário)
       - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
@@ -61,10 +51,3 @@ jobs:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
     runs-on: ubuntu-latest
     name: Close Pull Request Job
-    steps:
-      - name: Close Pull Request
-        id: closepullrequest
-        uses: Azure/static-web-apps-deploy@v1
-        with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_API_TOKEN_DEVELOP }}
-          action: "close"
