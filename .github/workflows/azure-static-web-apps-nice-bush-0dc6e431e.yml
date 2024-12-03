@@ -43,37 +43,18 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Check if Previous Commit Exists
+      - name: Install Supabase CLI
         run: |
-          if ! git cat-file -e ${{ github.event.before }}^{commit}; then
-            echo "Previous commit not found. Skipping diff check."
-            exit 0
-          fi
+          curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
+          sudo apt-get install -y nodejs
+          npm install -g supabase
 
-      - name: Find Modified SQL Files
-        id: find_files
-        run: |
-          echo "Searching for modified SQL files..."
-          MODIFIED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep 'supabase/migrations/develop/.*\.sql$' || true)
-          echo "MODIFIED_FILES=$MODIFIED_FILES" >> $GITHUB_ENV
-
-      - name: Update Supabase
-        if: env.MODIFIED_FILES != ''
+      - name: Apply Migrations
         env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_DEVELOP_URL }}
-          SUPABASE_API_KEY: ${{ secrets.SUPABASE_DEVELOP_API_KEY }}
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_DEVELOP_API_KEY }}
         run: |
-          for file in $MODIFIED_FILES; do
-            echo "Uploading $file to Supabase..."
-            CONTENT=$(cat "$file" | jq -Rs .) # Converte o conteúdo do arquivo em JSON
-            RESPONSE=$(curl -s -o response.json -w "%{http_code}" -X POST "${SUPABASE_URL}/rest/v1/migrations" \
-              -H "apikey: ${SUPABASE_API_KEY}" \
-              -H "Content-Type: application/json" \
-              -d "{\"file\":\"$file\",\"content\":$CONTENT}")
-            echo "Response HTTP Code: $RESPONSE"
-            echo "Response Body:"
-            cat response.json
-          done
+          echo "Applying migrations..."
+          supabase db push
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
