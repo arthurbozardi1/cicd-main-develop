@@ -2,8 +2,6 @@ name: Azure Static Web Apps CI/CD with Supabase Migrations
 
 on:
   push:
-    paths:
-      - 'supabase/migrations/develop/**/*.sql'
     branches:
       - develop
   pull_request:
@@ -16,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Build and Deploy Job
     env:
-      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_DEVELOP_API_KEY }}
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
       SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
 
     steps:
@@ -29,23 +27,15 @@ jobs:
       # Passo 2: Instalar o Supabase CLI
       - name: Install Supabase CLI
         run: |
-          mkdir -p /tmp/supabase-cli
-          curl -sSL https://github.com/supabase/cli/releases/latest/download/supabase_linux_amd64.tar.gz | tar xz -C /tmp/supabase-cli
-          sudo mv /tmp/supabase-cli/supabase /usr/local/bin
-          rm -rf /tmp/supabase-cli
+          curl -sSL https://github.com/supabase/cli/releases/latest/download/supabase_linux_amd64.tar.gz | tar xz
+          mv supabase /usr/local/bin
 
-      # Passo 3: Mover migrações do diretório `develop` para o padrão
-      - name: Prepare Migrations
-        run: |
-          mkdir -p supabase/migrations
-          cp -R supabase/migrations/develop/* supabase/migrations/
-
-      # Passo 4: Aplicar migrações diretamente
+      # Passo 3: Aplicar migrações diretamente
       - name: Apply Supabase Migrations
         run: |
-          supabase db push
+          supabase db push --migrations-dir ./migrations/develop
 
-      # Passo 5: Build e deploy do Azure (caso necessário)
+      # Passo 4: Build e deploy do Azure (caso necessário)
       - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
@@ -61,10 +51,3 @@ jobs:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
     runs-on: ubuntu-latest
     name: Close Pull Request Job
-    steps:
-      - name: Close Pull Request
-        id: closepullrequest
-        uses: Azure/static-web-apps-deploy@v1
-        with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_API_TOKEN_DEVELOP }}
-          action: "close"
