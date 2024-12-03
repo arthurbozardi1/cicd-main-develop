@@ -33,3 +33,8 @@ Este job é responsável por:
 
 ```yaml
 name: Build, Deploy, and Update Supabase Database
+```
+
+### URLs:
+- **Branch `main`**: [https://blue-mushroom-03989e210.4.azurestaticapps.net/](https://blue-mushroom-03989e210.4.azurestaticapps.net/)
+- **Branch `develop`**: [https://orange-forest-09524c210.4.azurestaticapps.net/](https://orange-forest-09524c210.4.azurestaticapps.net/)
