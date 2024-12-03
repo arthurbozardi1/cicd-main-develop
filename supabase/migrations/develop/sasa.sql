@@ -1,7 +1,7 @@
 -- 20241201_create_users_table.sql
 
 -- Criação da tabela 'users'
-CREATE TABLE IF NOT EXISTS users (
+CREATE TABLE IF NOT EXISTS dasdas (
   id BIGSERIAL PRIMARY KEY,
   username VARCHAR(50) UNIQUE NOT NULL,
   email VARCHAR(100) UNIQUE NOT NULL,
@@ -9,6 +9,3 @@ CREATE TABLE IF NOT EXISTS users (
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
-
--- Criação de um índice para melhorar consultas por e-mail
-CREATE INDEX IF NOT EXISTS idx_users_email ON users (email);
