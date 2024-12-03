@@ -66,10 +66,13 @@ jobs:
           for file in $MODIFIED_FILES; do
             echo "Uploading $file to Supabase..."
             CONTENT=$(cat "$file" | jq -Rs .) # Converte o conteúdo do arquivo em JSON
-            curl -X POST "${SUPABASE_URL}/rest/v1/migrations" \
+            RESPONSE=$(curl -s -o response.json -w "%{http_code}" -X POST "${SUPABASE_URL}/rest/v1/migrations" \
               -H "apikey: ${SUPABASE_API_KEY}" \
               -H "Content-Type: application/json" \
-              -d "{\"file\":\"$file\",\"content\":$CONTENT}"
+              -d "{\"file\":\"$file\",\"content\":$CONTENT}")
+            echo "Response HTTP Code: $RESPONSE"
+            echo "Response Body:"
+            cat response.json
           done
 
   close_pull_request_job:
