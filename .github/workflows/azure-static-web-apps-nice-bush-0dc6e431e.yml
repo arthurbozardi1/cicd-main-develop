@@ -45,9 +45,10 @@ jobs:
 
       - name: Install Supabase CLI
         run: |
-          curl -fsSL https://get.supabase.com/install/linux | sh
-          echo 'export PATH="$HOME/.supabase/bin:$PATH"' >> ~/.bashrc
-          source ~/.bashrc
+          echo "Downloading Supabase CLI..."
+          wget -q https://github.com/supabase/cli/releases/latest/download/supabase-linux-amd64 -O supabase
+          chmod +x supabase
+          sudo mv supabase /usr/local/bin/
           supabase --version
 
       - name: Apply Migrations with Supabase CLI
