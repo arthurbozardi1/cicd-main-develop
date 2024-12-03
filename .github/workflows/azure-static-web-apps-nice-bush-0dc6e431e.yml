@@ -30,12 +30,18 @@ jobs:
           curl -sSL https://github.com/supabase/cli/releases/latest/download/supabase_linux_amd64.tar.gz | tar xz
           mv supabase /usr/local/bin
 
-      # Passo 3: Aplicar migrações diretamente
+      # Passo 3: Mover migrações do diretório `develop` para o padrão (opcional, se necessário)
+      - name: Prepare Migrations
+        run: |
+          mkdir -p supabase/migrations
+          cp -R supabase/migrations/develop/* supabase/migrations/
+
+      # Passo 4: Aplicar migrações diretamente
       - name: Apply Supabase Migrations
         run: |
-          supabase db push --migrations-dir ./migrations/develop
+          supabase db push
 
-      # Passo 4: Build e deploy do Azure (caso necessário)
+      # Passo 5: Build e deploy do Azure (caso necessário)
       - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
