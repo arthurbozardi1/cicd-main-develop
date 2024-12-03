@@ -92,6 +92,7 @@ jobs:
         run: |
           echo "Aplicando migrações..."
           supabase db push
+        working-directory: ./supabase  # Alterado para o diretório onde o projeto Supabase está localizado
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
