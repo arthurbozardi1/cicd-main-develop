@@ -43,18 +43,30 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Garante que todo o histórico do Git seja clonado
+
+      - name: Check if Previous Commit Exists
+        run: |
+          if ! git cat-file -e ${{ github.event.before }}^{commit}; then
+            echo "Previous commit not found. Skipping diff check."
+            exit 0
+          fi
+
       - name: Find Modified SQL Files
         id: find_files
         run: |
           echo "Searching for modified SQL files..."
-          git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep 'supabase/migrations/develop/.*\.sql$' || true
+          MODIFIED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep 'supabase/migrations/develop/.*\.sql$' || true)
+          echo "::set-output name=modified_files::$MODIFIED_FILES"
+
       - name: Update Supabase
         if: steps.find_files.outputs.modified_files != ''
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_DEVELOP_URL }}
           SUPABASE_API_KEY: ${{ secrets.SUPABASE_DEVELOP_API_KEY }}
         run: |
-          for file in $(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep 'supabase/migrations/develop/.*\.sql$'); do
+          for file in $(echo ${{ steps.find_files.outputs.modified_files }}); do
             echo "Uploading $file to Supabase..."
             curl -X POST "${SUPABASE_URL}/rest/v1/migrations" \
               -H "apikey: ${SUPABASE_API_KEY}" \
