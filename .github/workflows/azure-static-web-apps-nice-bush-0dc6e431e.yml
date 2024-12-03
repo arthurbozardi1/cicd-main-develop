@@ -59,6 +59,10 @@ jobs:
             exit 1
           fi
 
+          # Listar o conteúdo do tarball para verificar os arquivos
+          echo "Conteúdo do tarball:"
+          tar -tzf supabase-cli.tar.gz
+
           # Cria um diretório temporário para extrair o arquivo
           mkdir -p /tmp/supabase
 
