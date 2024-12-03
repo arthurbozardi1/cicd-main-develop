@@ -25,14 +25,38 @@ jobs:
       - name: Set Environment Variables
         run: echo "GCOCONSTR=${{ secrets.SUPABASE_DB_URL_DEVELOP }}" >> $GITHUB_ENV
 
+      # Validate the database connection string secret
+      - name: Validate Database Connection Secret
+        run: |
+          if [ -z "$GCOCONSTR" ]; then
+            echo "Database connection string is missing! Ensure SUPABASE_DB_URL_DEVELOP is set.";
+            exit 1;
+          fi
+
       # Run migrations
       - name: Apply Supabase Migrations
         run: |
-          for file in $(ls supabase/migrations/develop/*.sql); do
-            echo "Applying migration: $file"
-            PGPASSWORD=$(echo $GCOCONSTR | sed 's|.*://.*:||' | sed 's|@.*||') \
-            psql $GCOCONSTR -f $file
-          done
+          # Extract connection parameters
+          PGPASSWORD=$(echo $GCOCONSTR | awk -F'[:@]' '{print $2}')
+          DB_HOST=$(echo $GCOCONSTR | awk -F'[@/:]' '{print $4}')
+          DB_PORT=$(echo $GCOCONSTR | awk -F'[@/:]' '{print $5}')
+          DB_NAME=$(echo $GCOCONSTR | awk -F'/' '{print $NF}')
+          DB_USER=$(echo $GCOCONSTR | awk -F'[/:@]' '{print $4}')
+
+          echo "Connecting to $DB_HOST:$DB_PORT/$DB_NAME as $DB_USER"
+
+          # Apply migrations if any files exist
+          if [ "$(ls supabase/migrations/develop/*.sql 2>/dev/null)" ]; then
+            for file in supabase/migrations/develop/*.sql; do
+              echo "Applying migration: $file"
+              psql -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME -f $file || {
+                echo "Failed to apply migration: $file"; exit 1;
+              }
+            done
+          else
+            echo "No migration files found in supabase/migrations/develop"
+          fi
+        shell: bash
 
       # Build and deploy
       - name: Build And Deploy
