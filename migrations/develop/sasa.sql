@@ -4,5 +4,4 @@ CREATE TABLE IF NOT EXISTS usuarios (
   nome TEXT NOT NULL
 );
 
--- Adicionar um índice na coluna 'nome' para otimizar buscas
 CREATE INDEX IF NOT EXISTS idx_usuarios_nome ON usuarios (nome);
