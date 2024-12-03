@@ -46,19 +46,23 @@ jobs:
       - name: Install Supabase CLI
         run: |
           echo "Baixando Supabase CLI..."
-          curl -sL https://github.com/supabase/cli/releases/download/v1.63.3/supabase-linux-amd64 -o supabase-cli
+          curl -sL https://github.com/supabase/cli/releases/download/v1.226.3/supabase_linux_amd64.tar.gz -o supabase-cli.tar.gz
           if [ $? -ne 0 ]; then
             echo "Erro ao baixar o Supabase CLI."
             exit 1
           fi
-          # Verifica se o arquivo baixado é válido
-          file supabase-cli
+
+          # Verifica se o arquivo é válido
+          file supabase-cli.tar.gz
           if [ $? -ne 0 ]; then
-            echo "O arquivo baixado não é um binário válido."
+            echo "O arquivo baixado não é um tarball válido."
             exit 1
           fi
-          chmod +x supabase-cli
-          sudo mv supabase-cli /usr/local/bin/supabase
+
+          # Extrai o tarball
+          tar -xzf supabase-cli.tar.gz
+          chmod +x supabase-linux-amd64
+          sudo mv supabase-linux-amd64 /usr/local/bin/supabase
           supabase --version
 
       - name: Apply Migrations with Supabase CLI
