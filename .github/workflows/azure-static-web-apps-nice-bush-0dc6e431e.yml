@@ -52,7 +52,7 @@ jobs:
             exit 1
           fi
 
-          # Verifica se o arquivo é válido
+          # Verifica se o arquivo tar foi baixado corretamente
           file supabase-cli.tar.gz
           if [ $? -ne 0 ]; then
             echo "O arquivo baixado não é um tarball válido."
@@ -61,8 +61,21 @@ jobs:
 
           # Extrai o tarball
           tar -xzf supabase-cli.tar.gz
+
+          # Verifica se o arquivo binário existe no diretório extraído
+          if [ ! -f "supabase-linux-amd64" ]; then
+            echo "Binário do Supabase não encontrado após a extração."
+            exit 1
+          fi
+
+          # Remover o binário existente, se já houver um
+          sudo rm -f /usr/local/bin/supabase
+
+          # Mover o binário extraído para o diretório correto
           chmod +x supabase-linux-amd64
           sudo mv supabase-linux-amd64 /usr/local/bin/supabase
+
+          # Verificar a versão do Supabase CLI
           supabase --version
 
       - name: Apply Migrations with Supabase CLI
