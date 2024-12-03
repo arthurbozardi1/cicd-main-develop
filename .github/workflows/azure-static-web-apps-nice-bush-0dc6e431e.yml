@@ -1,15 +1,17 @@
 name: Azure Static Web Apps CI/CD
 
 on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+    branches:
+      - main
   push:
     branches:
       - main
     paths:
       - "supabase/migrations/main/*.sql"  # Monitora alterações nos arquivos .sql na branch main
-  pull_request:
-    types: [opened, synchronize, reopened, closed]
-    branches:
-      - main
+  schedule:
+    - cron: '0 21 * * *'  # Agendado para rodar todos os dias às 21:00 (UTC)
 
 jobs:
   build_and_deploy_job:
@@ -34,7 +36,7 @@ jobs:
           skip_app_build: true
 
   update_supabase_job:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'schedule'
     runs-on: ubuntu-latest
     name: Update Supabase Job
     steps:
