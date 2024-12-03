@@ -25,11 +25,12 @@ jobs:
         run: |
           curl -sSL https://github.com/supabase/cli/releases/download/v1.18.0/supabase_1.18.0_linux_amd64.tar.gz | tar xz
           mv supabase /usr/local/bin
+          supabase --version # Verificar se o supabase CLI foi instalado corretamente
 
       # Rodar as migrações no Supabase
-      - name: Run Supabase Migrations
+      - name: Apply Supabase Migrations
         run: |
-          supabase migrations apply --project-url ${{ secrets.SUPABASE_DEVELOP_URL }} --api-key ${{ secrets.SUPABASE_DEVELOP_API_KEY }} --schema public --migrations-dir /migrations/develop
+          supabase migration apply --project-url ${{ secrets.SUPABASE_DEVELOP_URL }} --api-key ${{ secrets.SUPABASE_DEVELOP_API_KEY }} --schema public --migrations-dir ./migrations/develop
 
       # Realizar o build e deploy do aplicativo
       - name: Build And Deploy
