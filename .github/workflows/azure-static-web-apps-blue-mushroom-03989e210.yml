@@ -8,10 +8,14 @@ on:
     types: [opened, synchronize, reopened, closed]
     branches:
       - main
+  schedule:
+    - cron: '25 23 * * *' 
 
 jobs:
   build_and_deploy_job:
-    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
+    if: github.event_name == 'push' ||
+        (github.event_name == 'pull_request' && github.event.action != 'closed') ||
+        github.event_name == 'schedule'
     runs-on: ubuntu-latest
     name: Build, Deploy, and Update Supabase Database
     steps:
